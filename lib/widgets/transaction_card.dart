@@ -25,10 +25,10 @@ class TransactionCard extends StatelessWidget {
     final color = isIncome ? Colors.green : Colors.red;
 
     final category = categories.where((c) => c.id == transaction.categoryId);
-    final categoryName =
-        category.isNotEmpty ? category.first.name : 'ไม่มีหมวดหมู่';
-    final categoryIcon =
-        category.isNotEmpty ? category.first.icon : null;
+    final categoryName = category.isNotEmpty
+        ? category.first.name
+        : 'ไม่มีหมวดหมู่';
+    final categoryIcon = category.isNotEmpty ? category.first.icon : null;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -64,11 +64,20 @@ class TransactionCard extends StatelessWidget {
             PopupMenuButton<String>(
               onSelected: (value) {
                 if (value == 'edit') onEdit();
-                if (value == 'delete') onDelete();
+                if (value == 'delete') {
+                  assert(
+                    transaction.id.isNotEmpty,
+                    'Transaction ID must not be empty',
+                  );
+                  onDelete();
+                }
               },
               itemBuilder: (_) => [
                 const PopupMenuItem(value: 'edit', child: Text('แก้ไข')),
-                const PopupMenuItem(value: 'delete', child: Text('ลบ')),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('ลบ', style: TextStyle(color: Colors.red)),
+                ),
               ],
             ),
           ],

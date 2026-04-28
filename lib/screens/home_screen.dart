@@ -28,16 +28,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final results =
-          await Future.wait([ApiService.getTransactions(), ApiService.getCategories()]);
+      final results = await Future.wait([
+        ApiService.getTransactions(),
+        ApiService.getCategories(),
+      ]);
       setState(() {
         _transactions = results[0] as List<Transaction>;
         _categories = results[1] as List<Category>;
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('โหลดข้อมูลล้มเหลว: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('โหลดข้อมูลล้มเหลว: $e')));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -56,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-          builder: (_) => TransactionFormScreen(transaction: transaction)),
+        builder: (_) => TransactionFormScreen(transaction: transaction),
+      ),
     );
     if (result == true) _load();
   }
@@ -69,12 +73,14 @@ class _HomeScreenState extends State<HomeScreen> {
         content: const Text('ต้องการลบรายการนี้หรือไม่?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ยกเลิก')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('ยกเลิก'),
+          ),
           ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('ลบ', style: TextStyle(color: Colors.white))),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('ลบ', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
@@ -85,8 +91,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _load();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('ลบไม่สำเร็จ: $e')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('ลบไม่สำเร็จ: $e')));
         }
       }
     }
@@ -102,15 +109,14 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.category),
             tooltip: 'หมวดหมู่',
             onPressed: () async {
-              await Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const CategoryScreen()));
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CategoryScreen()),
+              );
               _load();
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _load,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _load),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -132,7 +138,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SliverPadding(
                     padding: const EdgeInsets.only(
-                        left: 16, right: 16, top: 8, bottom: 4),
+                      left: 16,
+                      right: 16,
+                      top: 8,
+                      bottom: 4,
+                    ),
                     sliver: SliverToBoxAdapter(
                       child: Text(
                         'รายการทั้งหมด (${_transactions.length})',
@@ -146,25 +156,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.receipt_long,
-                                    size: 64, color: Colors.grey),
+                                Icon(
+                                  Icons.receipt_long,
+                                  size: 64,
+                                  color: Colors.grey,
+                                ),
                                 SizedBox(height: 12),
-                                Text('ยังไม่มีรายการ',
-                                    style: TextStyle(color: Colors.grey)),
+                                Text(
+                                  'ยังไม่มีรายการ',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                               ],
                             ),
                           ),
                         )
                       : SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (_, i) => TransactionCard(
-                              transaction: _transactions[i],
+                          delegate: SliverChildBuilderDelegate((_, i) {
+                            final t =
+                                _transactions[i]; // capture ตัวแปรแยก หยุด closure bug
+                            return TransactionCard(
+                              transaction: t,
                               categories: _categories,
-                              onEdit: () => _openForm(transaction: _transactions[i]),
-                              onDelete: () => _delete(_transactions[i]),
-                            ),
-                            childCount: _transactions.length,
-                          ),
+                              onEdit: () => _openForm(transaction: t),
+                              onDelete: () => _delete(t),
+                            );
+                          }, childCount: _transactions.length),
                         ),
                   const SliverToBoxAdapter(child: SizedBox(height: 80)),
                 ],

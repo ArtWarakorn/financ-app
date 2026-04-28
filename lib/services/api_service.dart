@@ -10,8 +10,7 @@ class ApiService {
   // ── TRANSACTIONS ──────────────────────────────────────────
 
   static Future<List<Transaction>> getTransactions() async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/api/transactions'));
+    final response = await http.get(Uri.parse('$baseUrl/api/transactions'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final list = json['data'] as List<dynamic>;
@@ -23,7 +22,8 @@ class ApiService {
   }
 
   static Future<Transaction> createTransaction(
-      Map<String, dynamic> data) async {
+    Map<String, dynamic> data,
+  ) async {
     final response = await http.post(
       Uri.parse('$baseUrl/api/transactions'),
       headers: {'Content-Type': 'application/json'},
@@ -37,7 +37,9 @@ class ApiService {
   }
 
   static Future<Transaction> updateTransaction(
-      String id, Map<String, dynamic> data) async {
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final response = await http.put(
       Uri.parse('$baseUrl/api/transactions/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -51,9 +53,15 @@ class ApiService {
   }
 
   static Future<void> deleteTransaction(String id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/api/transactions/$id'),
-    );
+    // ตรวจสอบ id ก่อนส่ง
+    final trimmedId = id.trim();
+    if (trimmedId.isEmpty) {
+      throw Exception('Transaction ID is empty');
+    }
+
+    final uri = Uri.parse('$baseUrl/api/transactions/$trimmedId');
+    final response = await http.delete(uri);
+
     if (response.statusCode != 200) {
       throw Exception('Failed to delete transaction: ${response.body}');
     }
@@ -62,8 +70,7 @@ class ApiService {
   // ── CATEGORIES ────────────────────────────────────────────
 
   static Future<List<Category>> getCategories() async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/api/categorise'));
+    final response = await http.get(Uri.parse('$baseUrl/api/categorise'));
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final list = json['data'] as List<dynamic>;
@@ -88,7 +95,9 @@ class ApiService {
   }
 
   static Future<Category> updateCategory(
-      String id, Map<String, dynamic> data) async {
+    String id,
+    Map<String, dynamic> data,
+  ) async {
     final response = await http.put(
       Uri.parse('$baseUrl/api/categorise/$id'),
       headers: {'Content-Type': 'application/json'},
