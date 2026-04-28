@@ -2,7 +2,7 @@ class Transaction {
   final String id;
   final String? userId;
   final String? categoryId;
-  final String type; // 'income' | 'expense'
+  final String type;
   final double amount;
   final String? note;
   final DateTime transactionDate;
@@ -20,16 +20,23 @@ class Transaction {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    final id = json['id']?.toString() ?? '';
+    if (id.isEmpty) {
+      throw Exception('Transaction has no valid id: $json');
+    }
     return Transaction(
-      id: json['id'] as String,
-      userId: json['user_id'] as String?,
-      categoryId: json['category_id'] as String?,
-      type: json['type'] as String,
-      amount: double.parse(json['amount'].toString()),
-      note: json['note'] as String?,
-      transactionDate: DateTime.parse(json['transaction_date'] as String),
+      id: id,
+      userId: json['user_id']?.toString(),
+      categoryId: json['category_id']?.toString(),
+      type: json['type']?.toString() ?? 'expense',
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
+      note: json['note']?.toString(),
+      transactionDate: json['transaction_date'] != null
+          ? DateTime.tryParse(json['transaction_date'].toString()) ??
+              DateTime.now()
+          : DateTime.now(),
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
     );
   }

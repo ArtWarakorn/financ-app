@@ -1,7 +1,7 @@
 class Category {
   final String id;
   final String name;
-  final String type; // 'income' | 'expense'
+  final String type;
   final String? icon;
   final DateTime? createdAt;
 
@@ -14,13 +14,17 @@ class Category {
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
+    final id = json['id']?.toString() ?? '';
+    if (id.isEmpty) {
+      throw Exception('Category has no valid id: $json');
+    }
     return Category(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      type: json['type'] as String,
-      icon: json['icon'] as String?,
+      id: id,
+      name: json['name']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'expense',
+      icon: json['icon']?.toString(),
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
     );
   }

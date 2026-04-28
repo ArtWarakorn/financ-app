@@ -26,8 +26,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
       setState(() => _categories = cats);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('โหลดไม่สำเร็จ: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('โหลดไม่สำเร็จ: $e')));
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -63,7 +64,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 TextFormField(
                   controller: nameCtrl,
                   decoration: const InputDecoration(
-                      labelText: 'ชื่อหมวดหมู่', border: OutlineInputBorder()),
+                    labelText: 'ชื่อหมวดหมู่',
+                    border: OutlineInputBorder(),
+                  ),
                   validator: (v) =>
                       (v == null || v.isEmpty) ? 'กรุณากรอกชื่อ' : null,
                 ),
@@ -71,15 +74,18 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 TextFormField(
                   controller: iconCtrl,
                   decoration: const InputDecoration(
-                      labelText: 'ไอคอน (emoji)', border: OutlineInputBorder()),
+                    labelText: 'ไอคอน (emoji)',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
               ],
             ),
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('ยกเลิก')),
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('ยกเลิก'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 if (!formKey.currentState!.validate()) return;
@@ -100,7 +106,8 @@ class _CategoryScreenState extends State<CategoryScreen> {
                 } catch (e) {
                   if (ctx.mounted) {
                     ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text('บันทึกไม่สำเร็จ: $e')));
+                      SnackBar(content: Text('บันทึกไม่สำเร็จ: $e')),
+                    );
                   }
                 }
               },
@@ -115,6 +122,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
   }
 
   Future<void> _delete(Category cat) async {
+    // ตรวจสอบ id ก่อน
+    if (cat.id.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('ไม่พบ ID ของหมวดหมู่')));
+      return;
+    }
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -122,12 +137,14 @@ class _CategoryScreenState extends State<CategoryScreen> {
         content: Text('ต้องการลบ "${cat.name}" หรือไม่?'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('ยกเลิก')),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('ยกเลิก'),
+          ),
           ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('ลบ', style: TextStyle(color: Colors.white))),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('ลบ', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
@@ -138,8 +155,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
         _load();
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('ลบไม่สำเร็จ: $e')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('ลบไม่สำเร็จ: $e')));
         }
       }
     }
@@ -158,14 +176,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
           : ListView.builder(
               itemCount: _categories.length,
               itemBuilder: (_, i) {
-                final cat = _categories[i];
+                final cat = _categories[i]; // ← capture แยกก่อนทุกครั้ง
                 final isIncome = cat.type == 'income';
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor:
-                        (isIncome ? Colors.green : Colors.red).withOpacity(0.15),
-                    child: Text(cat.icon ?? (isIncome ? '💰' : '💸'),
-                        style: const TextStyle(fontSize: 20)),
+                    backgroundColor: (isIncome ? Colors.green : Colors.red)
+                        .withOpacity(0.15),
+                    child: Text(
+                      cat.icon ?? (isIncome ? '💰' : '💸'),
+                      style: const TextStyle(fontSize: 20),
+                    ),
                   ),
                   title: Text(cat.name),
                   subtitle: Text(isIncome ? 'รายรับ' : 'รายจ่าย'),
@@ -173,12 +193,17 @@ class _CategoryScreenState extends State<CategoryScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                          icon: const Icon(Icons.edit, size: 20),
-                          onPressed: () => _showForm(cat: cat)),
+                        icon: const Icon(Icons.edit, size: 20),
+                        onPressed: () => _showForm(cat: cat),
+                      ),
                       IconButton(
-                          icon: const Icon(Icons.delete,
-                              size: 20, color: Colors.red),
-                          onPressed: () => _delete(cat)),
+                        icon: const Icon(
+                          Icons.delete,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                        onPressed: () => _delete(cat),
+                      ),
                     ],
                   ),
                 );
